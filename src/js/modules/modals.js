@@ -1,5 +1,7 @@
 const modals = () => {
-  function bindModal(triggerSelector, modalSelector, closeSelector, closeClickOverlay = true) {
+  let btnPressed = false;
+
+  function bindModal(triggerSelector, modalSelector, closeSelector, closeClickOverlay = true, destroyTrigger = false) {
     const triggers = document.querySelectorAll(triggerSelector),
       modal = document.querySelector(modalSelector),
       close = document.querySelector(closeSelector),
@@ -11,15 +13,21 @@ const modals = () => {
           e.preventDefault();
         }
 
+        btnPressed = true;
+
+        if (destroyTrigger) {
+          item.remove();
+        }
+
         windows.forEach((item) => {
           item.style.display = 'none';
+          item.classList.add('animated', 'fadeIn');
         });
 
         modal.style.display = 'block';
         document.body.style.overflow = 'hidden';
-        const scrollWidth = calsScroll();
+        const scrollWidth = calcScroll();
         document.body.style.marginRight = scrollWidth;
-        opened = true;
 
         close.addEventListener('click', () => {
           modal.style.display = 'none';
@@ -42,7 +50,7 @@ const modals = () => {
     });
   }
 
-  function calsScroll() {
+  function calcScroll() {
     const div = document.createElement('div');
 
     div.style.width = '50px';
@@ -69,14 +77,26 @@ const modals = () => {
       if (!display) {
         document.querySelector(selector).style.display = 'block';
         document.body.style.overflow = 'hidden';
-        document.body.style.marginRight = calsScroll();
+        document.body.style.marginRight = calcScroll();
       }
     }, time);
   }
 
-  bindModal('.button-design', '.popup-design', '.popup-design .popup-close', '[data-modal]');
-  bindModal('.button-consultation', '.popup-consultation', '.popup-consultation .popup-close', '[data-modal]');
-  showModalByTime('.popup-consultation', 3000);
+  function openByScroll(selector) {
+    window.addEventListener('scroll', () => {
+      let scrollHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+      let pageEnd = window.pageYOffset + document.documentElement.clientHeight + 1 >= scrollHeight;
+      if (!btnPressed && pageEnd) {
+        document.querySelector(selector).click();
+      }
+    });
+  }
+
+  bindModal('.button-design', '.popup-design', '.popup-design .popup-close');
+  bindModal('.button-consultation', '.popup-consultation', '.popup-consultation .popup-close');
+  bindModal('.fixed-gift', '.popup-gift', '.popup-gift .popup-close', true, true);
+  showModalByTime('.popup-consultation', 60000);
+  openByScroll('.fixed-gift');
 };
 
 export default modals;

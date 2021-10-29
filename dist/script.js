@@ -953,8 +953,11 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var modals = function modals() {
+  var btnPressed = false;
+
   function bindModal(triggerSelector, modalSelector, closeSelector) {
     var closeClickOverlay = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
+    var destroyTrigger = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
     var triggers = document.querySelectorAll(triggerSelector),
         modal = document.querySelector(modalSelector),
         close = document.querySelector(closeSelector),
@@ -965,14 +968,20 @@ var modals = function modals() {
           e.preventDefault();
         }
 
+        btnPressed = true;
+
+        if (destroyTrigger) {
+          item.remove();
+        }
+
         windows.forEach(function (item) {
           item.style.display = 'none';
+          item.classList.add('animated', 'fadeIn');
         });
         modal.style.display = 'block';
         document.body.style.overflow = 'hidden';
-        var scrollWidth = calsScroll();
+        var scrollWidth = calcScroll();
         document.body.style.marginRight = scrollWidth;
-        opened = true;
         close.addEventListener('click', function () {
           modal.style.display = 'none';
           document.body.style.overflow = '';
@@ -993,7 +1002,7 @@ var modals = function modals() {
     });
   }
 
-  function calsScroll() {
+  function calcScroll() {
     var div = document.createElement('div');
     div.style.width = '50px';
     div.style.height = '50px';
@@ -1017,14 +1026,27 @@ var modals = function modals() {
       if (!display) {
         document.querySelector(selector).style.display = 'block';
         document.body.style.overflow = 'hidden';
-        document.body.style.marginRight = calsScroll();
+        document.body.style.marginRight = calcScroll();
       }
     }, time);
   }
 
-  bindModal('.button-design', '.popup-design', '.popup-design .popup-close', '[data-modal]');
-  bindModal('.button-consultation', '.popup-consultation', '.popup-consultation .popup-close', '[data-modal]');
-  showModalByTime('.popup-consultation', 3000);
+  function openByScroll(selector) {
+    window.addEventListener('scroll', function () {
+      var scrollHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+      var pageEnd = window.pageYOffset + document.documentElement.clientHeight + 1 >= scrollHeight;
+
+      if (!btnPressed && pageEnd) {
+        document.querySelector(selector).click();
+      }
+    });
+  }
+
+  bindModal('.button-design', '.popup-design', '.popup-design .popup-close');
+  bindModal('.button-consultation', '.popup-consultation', '.popup-consultation .popup-close');
+  bindModal('.fixed-gift', '.popup-gift', '.popup-gift .popup-close', true, true);
+  showModalByTime('.popup-consultation', 60000);
+  openByScroll('.fixed-gift');
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (modals);
