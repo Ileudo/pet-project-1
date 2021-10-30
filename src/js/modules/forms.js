@@ -1,6 +1,7 @@
 const forms = () => {
   const forms = document.querySelectorAll('form'),
-    inputs = document.querySelectorAll('input');
+    inputs = document.querySelectorAll('input'),
+    upload = document.querySelectorAll('[name="upload"]');
 
   const message = {
     loading: 'Загрузка...',
@@ -29,7 +30,21 @@ const forms = () => {
     inputs.forEach((item) => {
       item.value = '';
     });
+    upload.forEach((item) => {
+      item.previousElementSibling.textContent = 'Файл не выбран';
+    });
   };
+
+  upload.forEach((item) => {
+    item.addEventListener('input', () => {
+      const [inputName, ext] = item.files[0].name.split('.');
+      let dots;
+      inputName.length > 8 ? (dots = '...') : (dots = '.');
+      const outputName = inputName.substring(0, 8) + dots + ext;
+
+      item.previousElementSibling.textContent = outputName;
+    });
+  });
 
   forms.forEach((item) => {
     item.addEventListener('submit', (e) => {
@@ -41,7 +56,6 @@ const forms = () => {
 
       let statusImg = document.createElement('img');
       statusImg.setAttribute('src', message.spinner);
-      console.log(statusImg);
       statusImg.classList.add('animated', 'fadeInUp');
       statusMessage.appendChild(statusImg);
 
@@ -56,17 +70,18 @@ const forms = () => {
 
       const formData = new FormData(item);
       let api;
-      item.closest('.popup-design') ? (api = path.designer) : (api = path.question);
+      item.closest('.popup-design') || item.classList.contains('calc-form')
+        ? (api = path.designer)
+        : (api = path.question);
       console.log(api);
 
       postData(api, formData)
         .then((res) => {
-          console.log('success');
+          console.log(res);
           statusImg.setAttribute('src', message.ok);
           textMessage.textContent = message.success;
         })
         .catch(() => {
-          console.log('error');
           statusImg.setAttribute('src', message.fail);
           textMessage.textContent = message.failure;
         })
@@ -74,6 +89,9 @@ const forms = () => {
           clearInputs();
           setTimeout(() => {
             statusMessage.remove();
+            item.style.display = 'block';
+            item.classList.remove('fadeOutUp');
+            item.classList.add('fadeInUp');
           }, 5000);
         });
     });
