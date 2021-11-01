@@ -3,6 +3,8 @@ import { postData } from '../services/requests';
 const forms = () => {
   const forms = document.querySelectorAll('form'),
     inputs = document.querySelectorAll('input'),
+    selects = document.querySelectorAll('select'),
+    price = document.querySelector('.calc-price'),
     upload = document.querySelectorAll('[name="upload"]');
 
   const message = {
@@ -15,7 +17,7 @@ const forms = () => {
   };
 
   const path = {
-    designer: 'assets/server.php',
+    designer: 'assets/designer.php',
     question: 'assets/question.php',
   };
 
@@ -25,6 +27,10 @@ const forms = () => {
     });
     upload.forEach((item) => {
       item.previousElementSibling.textContent = 'Файл не выбран';
+    });
+    price.textContent = 'Для расчета нужно выбрать размер картины и материал картины';
+    selects.forEach((item) => {
+      item.value = '';
     });
   };
 
@@ -62,6 +68,10 @@ const forms = () => {
       }, 400);
 
       const formData = new FormData(item);
+      if (item.classList.contains('calc-form')) {
+        formData.append('price', price.value);
+      }
+
       let api;
       item.closest('.popup-design') || item.classList.contains('calc-form')
         ? (api = path.designer)
