@@ -37,9 +37,10 @@ const forms = () => {
   upload.forEach((item) => {
     item.addEventListener('input', () => {
       const [inputName, ext] = item.files[0].name.split('.');
-      let dots;
-      inputName.length > 8 ? (dots = '...') : (dots = '.');
-      const outputName = inputName.substring(0, 8) + dots + ext;
+      let outputName;
+      inputName.length > 8
+        ? (outputName = inputName.substring(0, 8) + '...' + ext)
+        : (outputName = inputName.substring(0, 10) + '.' + ext);
 
       item.previousElementSibling.textContent = outputName;
     });
